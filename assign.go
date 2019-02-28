@@ -17,6 +17,7 @@ func main() {
 	varFunc()
 	testAdd()
 	testFunc()
+	testStruct()
 }
 
 func varFunc() {
@@ -150,4 +151,47 @@ func testFunc() {
 	fmt.Println("odd = ", odd)
 	even := filter(slice, isEven)
 	fmt.Println("even = ", even)
+}
+
+type person struct {
+	name string
+	age  int
+}
+
+type student struct {
+	person
+	special string
+	skills
+	int
+}
+
+type skills []string
+
+type employee struct {
+	person
+	special string
+	age     int
+}
+
+func testStruct() {
+	tom := person{"Tom", 25}
+	fmt.Println(tom)
+	fmt.Println(tom.age)
+
+	mark := student{person: person{"Mark", 30}, special: "computer science"}
+	fmt.Println(mark)
+	fmt.Println(mark.name)
+	mark.name = "haha"
+	fmt.Println(mark.name)
+	mark.person.age -= 2
+	fmt.Println(mark.age)
+
+	mark.skills = append(mark.skills, "golang", "python")
+	fmt.Println(mark.skills)
+	mark.int = 3
+	fmt.Println(mark.int)
+
+	larry := employee{person{"larry", 12}, "designer", 20}
+	fmt.Println(larry.age)
+	fmt.Println(larry.person.age)
 }
