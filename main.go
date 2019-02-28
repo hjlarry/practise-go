@@ -5,4 +5,5 @@ func main() {
 	TestAdd()
 	TestFunc()
 	TestStruct()
+	TestMethod()
 }
