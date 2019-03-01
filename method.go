@@ -75,3 +75,54 @@ func (c color) string() string {
 	strings := []string{"WHITE", "BLACK", "BLUE", "RED", "YELLOW"}
 	return strings[c]
 }
+
+// TestMethod2 ...
+func TestMethod2() {
+	boxes := boxlist{
+		box{4, 4, 4, RED},
+		box{10, 2, 10, BLUE},
+		box{5, 5, 20, YELLOW},
+		box{1, 4, 4, BLACK},
+		box{4, 30, 4, WHITE},
+	}
+	fmt.Printf("we have %d boxes", len(boxes))
+	fmt.Println("first box volumn:", boxes[0].volume(), "cm3")
+	fmt.Println("last box color:", boxes[len(boxes)-1].color.string())
+	fmt.Println("biggest:", boxes.biggestColor().string())
+
+	fmt.Println("paint all to black:")
+	boxes.PaintItBlack()
+	fmt.Println("last box color:", boxes[len(boxes)-1].color.string())
+}
+
+type human struct {
+	name string
+	age  int
+}
+
+type student1 struct {
+	human
+	school string
+}
+
+type employee1 struct {
+	human
+	company string
+}
+
+func (h human) sayHi() {
+	fmt.Println("this is human", h.name)
+}
+
+func (e employee1) sayHi() {
+	fmt.Println("this is employee", e.name, e.company)
+}
+
+// TestMethod3 ... method继承和重写
+func TestMethod3() {
+	mark := student1{human{"mark", 30}, "MIT"}
+	sam := employee1{human{"sam", 30}, "Golang Inc."}
+
+	mark.sayHi()
+	sam.sayHi()
+}

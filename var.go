@@ -16,13 +16,13 @@ const A = 100
 // VarFunc ... 定义变量
 func VarFunc() {
 	fmt.Println("hello world")
-	var s1 int = 10
+	// var s1 int = 10
 	var s2 = 10
 	s3 := 10
 	fmt.Println(s2)
 	fmt.Println(s3)
 	for index := 0; index < 4; index++ {
-		fmt.Println(s1)
+		// fmt.Println(s1)
 	}
 	var local = 2
 	fmt.Println(global)
@@ -43,35 +43,35 @@ func VarFunc() {
 	fmt.Println(ua, ub, uc, ud)
 
 	// int 类型，在32位机器上占4个字节，在64位机器上占8个字节
-	var e int = 5
-	var ue uint = 5
-	fmt.Println(e, ue)
+	// var e int = 5
+	// var ue uint = 5
+	// fmt.Println(e, ue)
 
 	// bool 类型
-	var f bool = true
-	fmt.Println(f)
+	// var f bool = true
+	// fmt.Println(f)
 
 	// 字节类型
 	var j byte = 'a'
 	fmt.Println(j)
 
 	// 字符串类型
-	var g string = "abcdefg"
-	fmt.Println(g)
+	// var g string = "abcdefg"
+	// fmt.Println(g)
 
 	// 浮点数
-	var h float32 = 3.14
-	var i float64 = 3.141592653
-	fmt.Println(h, i)
+	// var h float32 = 3.14
+	// var i float64 = 3.141592653
+	// fmt.Println(h, i)
 
 	var aArray [9]int
 	fmt.Println(aArray)
 
 	var aa = [10]int{1, 3, 4}
-	var bb [10]int = [10]int{1, 3, 4}
+	// var bb [10]int = [10]int{1, 3, 4}
 	cc := [10]int{1, 3, 4}
 	fmt.Println(aa)
-	fmt.Println(bb)
+	// fmt.Println(bb)
 	fmt.Println(cc)
 
 	var seq [9]int

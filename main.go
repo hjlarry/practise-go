@@ -6,4 +6,6 @@ func main() {
 	TestFunc()
 	TestStruct()
 	TestMethod()
+	TestMethod2()
+	TestMethod3()
 }
