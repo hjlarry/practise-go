@@ -8,4 +8,5 @@ func main() {
 	TestMethod()
 	TestMethod2()
 	TestMethod3()
+	TestInterface()
 }
