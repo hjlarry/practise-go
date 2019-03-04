@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 type Human struct {
 	name  string
@@ -98,4 +101,14 @@ func TestInterface() {
 	for _, value := range x {
 		value.SayHi()
 	}
+}
+
+// 通过这个方法 Human 实现了 fmt.Stringer
+func (h Human) String() string {
+	return "❰" + h.name + " - " + strconv.Itoa(h.age) + " years -  ✆ " + h.phone + "❱"
+}
+
+func TestInterface2() {
+	Bob := Human{"bob", 39, "13123772"}
+	fmt.Println("this is ", Bob)
 }

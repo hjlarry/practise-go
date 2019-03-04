@@ -9,4 +9,6 @@ func main() {
 	TestMethod2()
 	TestMethod3()
 	TestInterface()
+	TestInterface2()
+	TestSlice()
 }
