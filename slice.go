@@ -2,6 +2,7 @@ package main
 
 import "fmt"
 
+// TestSlice ...
 func TestSlice() {
 	var fruits = map[string]int{
 		"apple":  2,

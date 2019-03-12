@@ -85,3 +85,27 @@ func VarFunc() {
 		fmt.Println(err)
 	}
 }
+
+// TestString ... 测试字符串
+func TestString() {
+	var s = "嘻哈china"
+	for i := 0; i < len(s); i++ {
+		fmt.Printf("%x ", s[i])
+	}
+	fmt.Println()
+	for codepoint, runeValue := range s {
+		fmt.Printf("%d %d ", codepoint, int32(runeValue))
+	}
+	fmt.Println()
+
+	var s1 = s[0:3]
+	fmt.Println(s1)
+	var s2 = s[6:9]
+	fmt.Println(s2)
+
+	var b = []byte(s) // 字符串转字节切片
+	fmt.Println(b)
+	b[6] = 100
+	var s3 = string(b) // 字节切片转字符串
+	fmt.Println(s3)
+}
