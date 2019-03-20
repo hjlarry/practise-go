@@ -24,5 +24,6 @@ func main() {
 	// testChannel3()
 	// testChannel4()
 	// testChannel5()
-	testChannel6()
+	// testChannel6()
+	testHTTP()
 }
