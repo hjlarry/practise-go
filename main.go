@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/hjlarry/practise-go/http"
+)
+
 func main() {
 	// VarFunc()
 	// TestAdd()
@@ -25,5 +29,6 @@ func main() {
 	// testChannel4()
 	// testChannel5()
 	// testChannel6()
-	testHTTP()
+	// testHTTP()
+	http.TestHTTP()
 }
