@@ -23,6 +23,13 @@ func main() {
 	_, err = conn.Read(result)
 	checkError(err)
 	fmt.Println(string(result))
+
+	_, err = conn.Write([]byte("timestamp"))
+	checkError(err)
+	result = make([]byte, 256)
+	_, err = conn.Read(result)
+	checkError(err)
+	fmt.Println(string(result))
 	os.Exit(0)
 }
 func checkError(err error) {
