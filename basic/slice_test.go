@@ -1,9 +1,8 @@
-package main
+package basic
 
-import "fmt"
+import "testing"
 
-// TestSlice ...
-func TestSlice() {
+func TestSlice(t *testing.T) {
 	var fruits = map[string]int{
 		"apple":  2,
 		"banana": 5,
@@ -18,7 +17,7 @@ func TestSlice() {
 		scores = append(scores, score)
 	}
 
-	fmt.Println(names, scores)
+	t.Log(names, scores)
 
 	var names1 = make([]string, len(fruits))
 	var scores1 = make([]int, len(fruits))
@@ -27,6 +26,6 @@ func TestSlice() {
 		scores1 = append(scores1, score)
 	}
 
-	fmt.Println(names1, scores1)
+	t.Log(names1, scores1)
 
 }
