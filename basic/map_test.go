@@ -44,3 +44,33 @@ func TestMapElement(t *testing.T) {
 		t.Log(k, v)
 	}
 }
+
+func TestMapForFunc(t *testing.T) {
+	// key是整数，value是func，使用map创建了工厂方法
+	map1 := map[int]func(op int) int{}
+	map1[1] = func(op int) int { return op }
+	map1[2] = func(op int) int { return op * op }
+	map1[3] = func(op int) int { return op * op * op }
+	t.Log(map1[1](3))
+	t.Log(map1[2](3))
+	t.Log(map1[3](3))
+}
+
+func TestMapForSet(t *testing.T) {
+	mySet := map[int]bool{}
+	// 添加
+	mySet[1] = true
+	mySet[2] = true
+	mySet[1] = true
+	// 判断是否存在
+	if mySet[2] {
+		t.Log("exist")
+	}
+	// set元素数量
+	t.Log(len(mySet))
+	// 删除
+	delete(mySet, 2)
+	if !mySet[2] {
+		t.Log("not exist")
+	}
+}
