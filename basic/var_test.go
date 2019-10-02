@@ -5,27 +5,6 @@ import (
 	"testing"
 )
 
-func TestString(t *testing.T) {
-	var s = "嘻哈china"
-	for i := 0; i < len(s); i++ {
-		t.Log(s[i])
-	}
-
-	for codepoint, runeValue := range s {
-		t.Log(codepoint, int32(runeValue))
-	}
-
-	var s1 = s[0:3]
-	t.Log(s1)
-	var s2 = s[6:9]
-	t.Log(s2)
-
-	var b = []byte(s) // 字符串转字节切片
-	t.Log(b)
-	b[6] = 100
-	var s3 = string(b) // 字节切片转字符串
-	t.Log(s3)
-}
 
 func TestVar(t *testing.T) {
 	// 有符号整数，可以表示正负
