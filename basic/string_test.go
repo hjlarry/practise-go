@@ -69,10 +69,10 @@ func TestStrings(t *testing.T) {
 func TestStrconv(t *testing.T) {
 	i := 1
 	s := strconv.Itoa(i)
-	t.Log(s + "str")
+	t.Logf("%T", s)
 	// 字符串转数字时会返回值+错误
 	b, _ := strconv.Atoi(s)
-	t.Log(b + 10)
+	t.Logf("%T", b)
 	c, err := strconv.Atoi("a")
 	t.Log(c)
 	t.Log(err)
