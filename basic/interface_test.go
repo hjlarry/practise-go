@@ -1,10 +1,27 @@
-package main
+package basic
 
 import (
 	"fmt"
-	"strconv"
+	"testing"
 )
 
+// 一、 简单的接口示例
+type GoPrograme struct {
+}
+type Programe interface {
+	hello() string
+}
+
+func (g *GoPrograme) hello() string {
+	return "hello go"
+}
+func TestInterface4(t *testing.T) {
+	var p Programe
+	p = new(GoPrograme)
+	t.Log(p.hello())
+}
+
+// 二、 复杂的接口示例
 // Human ...
 type Human struct {
 	name  string
@@ -78,7 +95,7 @@ type ElderlyGent interface {
 }
 
 // TestInterface ...
-func TestInterface() {
+func TestInterface(t *testing.T) {
 	mike := Student{Human{"Mike", 25, "222-222-XXX"}, "MIT", 0.00}
 	paul := Student{Human{"Paul", 26, "111-222-XXX"}, "Harvard", 100}
 	sam := Employee{Human{"Sam", 36, "444-222-XXX"}, "Golang Inc.", 1000}
@@ -110,17 +127,7 @@ func TestInterface() {
 	}
 }
 
-// 通过这个方法 Human 实现了 fmt.Stringer
-func (h Human) String() string {
-	return "❰" + h.name + " - " + strconv.Itoa(h.age) + " years -  ✆ " + h.phone + "❱"
-}
-
-// TestInterface2 ...
-func TestInterface2() {
-	Bob := Human{"bob", 39, "13123772"}
-	fmt.Println("this is ", Bob)
-}
-
+// 三、 多态
 type fruitable interface {
 	eat()
 }
@@ -147,7 +154,7 @@ func (b banana) eat() {
 }
 
 // TestInterface3 ... 通过接口模拟其他语言的多态
-func TestInterface3() {
+func TestInterface3(t *testing.T) {
 	var apple = fruit{"Apple", apple{}}
 	apple.want()
 	var banana = fruit{"Bana", banana{}}
