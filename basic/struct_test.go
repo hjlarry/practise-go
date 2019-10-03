@@ -1,6 +1,7 @@
 package basic
 
 import (
+	"fmt"
 	"testing"
 	"unsafe"
 )
@@ -25,7 +26,22 @@ type employee struct {
 	age     int
 }
 
-// TestStruct ... 结构体
+func TestStructInit(t *testing.T) {
+	// 结构体初始化的三种方式
+	e1 := person{name: "e1", age: 10}
+	e2 := person{"e2", 11}
+	e3 := new(person)
+	e3.name = "e3"
+	e3.age = 12
+	t.Log(e1)
+	t.Log(e2)
+	t.Log(e3)
+	// e3这种方式创建的为引用类型
+	t.Logf("%T", e1)
+	t.Logf("%T", e3)
+}
+
+// TestStruct ... 结构体的嵌套
 func TestStruct(t *testing.T) {
 	tom := person{"Tom", 25}
 	t.Log(tom)
@@ -90,4 +106,22 @@ func TestStruct2(t *testing.T) {
 	var as = ArrayStruct{[...]int{0, 1, 2, 3, 4, 5, 6, 7, 8}}
 	var ss = SliceStruct{[]int{0, 1, 2, 3, 4, 5, 6, 7, 8}}
 	t.Log(unsafe.Sizeof(as), unsafe.Sizeof(ss))
+}
+
+func (p person) String1() string {
+	fmt.Println("memory addr is ", unsafe.Pointer(&p.name))
+	return "person func without *"
+}
+
+// 使用这种方式定义的方法不会造成内存的复制
+func (p *person) String2() string {
+	fmt.Println("memory addr is ", unsafe.Pointer(&p.name))
+	return "person func with *"
+}
+
+func TestStructFunc(t *testing.T) {
+	var p person
+	fmt.Println("memory addr is ", unsafe.Pointer(&p.name))
+	t.Log(p.String1())
+	t.Log(p.String2())
 }
