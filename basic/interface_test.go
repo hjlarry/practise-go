@@ -7,6 +7,7 @@ import (
 
 // 一、 简单的接口示例
 type GoPrograme struct {
+	name string
 }
 type Programe interface {
 	hello() string
@@ -16,8 +17,9 @@ func (g *GoPrograme) hello() string {
 	return "hello go"
 }
 func TestInterface4(t *testing.T) {
+	g := &GoPrograme{}
 	var p Programe
-	p = new(GoPrograme)
+	p = g
 	t.Log(p.hello())
 }
 
@@ -153,10 +155,20 @@ func (b banana) eat() {
 	fmt.Println("eat banana")
 }
 
+func eatInterface(f fruitable) {
+	f.eat()
+}
+
 // TestInterface3 ... 通过接口模拟其他语言的多态
 func TestInterface3(t *testing.T) {
-	var apple = fruit{"Apple", apple{}}
-	apple.want()
-	var banana = fruit{"Bana", banana{}}
-	banana.want()
+	// 使用结构体的组合实现的多态
+	var app = fruit{"Apple", apple{}}
+	app.want()
+	var bana = fruit{"Banana", banana{}}
+	bana.want()
+	// 直接使用接口实现的多态
+	a := new(apple)
+	b := &banana{}
+	eatInterface(a)
+	eatInterface(b)
 }
