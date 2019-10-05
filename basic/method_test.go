@@ -1,8 +1,9 @@
-package main
+package basic
 
 import (
 	"fmt"
 	"math"
+	"testing"
 )
 
 type rectangle struct {
@@ -22,11 +23,11 @@ func (c circle) area() float64 {
 }
 
 // TestMethod ...
-func TestMethod() {
+func TestMethod(t *testing.T) {
 	r1 := rectangle{12, 2}
 	c1 := circle{10}
-	fmt.Println(r1.area())
-	fmt.Println(c1.area())
+	t.Log(r1.area())
+	t.Log(c1.area())
 }
 
 // color
@@ -45,7 +46,7 @@ type box struct {
 }
 type boxlist []box
 
-func (b box) volume() float64 {
+func (b *box) volume() float64 {
 	return b.width * b.height * b.depth
 }
 
@@ -77,7 +78,7 @@ func (c color) string() string {
 }
 
 // TestMethod2 ...
-func TestMethod2() {
+func TestMethod2(t *testing.T) {
 	boxes := boxlist{
 		box{4, 4, 4, RED},
 		box{10, 2, 10, BLUE},
@@ -85,14 +86,14 @@ func TestMethod2() {
 		box{1, 4, 4, BLACK},
 		box{4, 30, 4, WHITE},
 	}
-	fmt.Printf("we have %d boxes", len(boxes))
-	fmt.Println("first box volumn:", boxes[0].volume(), "cm3")
-	fmt.Println("last box color:", boxes[len(boxes)-1].color.string())
-	fmt.Println("biggest:", boxes.biggestColor().string())
+	t.Logf("we have %d boxes", len(boxes))
+	t.Log("first box volumn:", boxes[0].volume(), "cm3")
+	t.Log("last box color:", boxes[len(boxes)-1].color.string())
+	t.Log("biggest:", boxes.biggestColor().string())
 
-	fmt.Println("paint all to black:")
+	t.Log("paint all to black:")
 	boxes.PaintItBlack()
-	fmt.Println("last box color:", boxes[len(boxes)-1].color.string())
+	t.Log("last box color:", boxes[len(boxes)-1].color.string())
 }
 
 type human struct {
@@ -119,7 +120,7 @@ func (e employee1) sayHi() {
 }
 
 // TestMethod3 ... method继承和重写
-func TestMethod3() {
+func TestMethod3(t *testing.T) {
 	mark := student1{human{"mark", 30}, "MIT"}
 	sam := employee1{human{"sam", 30}, "Golang Inc."}
 
