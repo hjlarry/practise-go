@@ -172,3 +172,32 @@ func TestInterface3(t *testing.T) {
 	eatInterface(a)
 	eatInterface(b)
 }
+
+// 四、空接口断言
+
+func dosomething(any interface{}) {
+	// if i, ok := any.(int); ok {
+	// 	println("it`s interger:", i)
+	// 	return
+	// }
+	switch v := any.(type) {
+	case int:
+		println("it`s interger:", v)
+	case string:
+		println("it`s string:", v)
+	default:
+		println("unknown type")
+	}
+	println(any)
+	fmt.Printf("%T\n", any)
+
+}
+
+func TestInterface5(t *testing.T) {
+	i := 1000
+	dosomething(i)
+	b := "abc"
+	dosomething(b)
+	p := &b
+	dosomething(p)
+}
