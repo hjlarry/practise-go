@@ -77,9 +77,8 @@ func GetFib2(str string) {
 	println(list)
 }
 
-// 三、 redis的错误
-// TestException1 ... 一个redis错误处理的例子，不轻易使用异常捕获
-func TestException1(t *testing.T) {
+// 三、 redis的错误处理的例子，不轻易使用异常捕获
+func TestRedisConn(t *testing.T) {
 	var client = redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
@@ -118,6 +117,15 @@ func TestException1(t *testing.T) {
 	fmt.Println(ok)
 }
 
+// 四、panic和普通退出
+func TestPanicExit(t *testing.T) {
+	t.Log("start")
+	// os.Exit(-1)
+	panic(errors.New("sth wrong"))
+	t.Log("end")
+}
+
+// 五、panic+recover
 var errNeg = fmt.Errorf("not a positive number")
 
 func fact(a int) int {
@@ -127,8 +135,8 @@ func fact(a int) int {
 	return a
 }
 
-// TestException2 ... 异常捕获，但panic可以抛出错误以外的其他对象
-func TestException2(t *testing.T) {
+//异常捕获，但panic可以抛出错误以外的其他对象
+func TestPanicRecover(t *testing.T) {
 	defer func() {
 		if err := recover(); err != nil {
 			fmt.Println("error cached:", err)
