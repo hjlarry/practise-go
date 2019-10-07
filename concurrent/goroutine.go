@@ -3,29 +3,9 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"runtime"
 	"sync"
 	"time"
 )
-
-func testGoroutine() {
-	// 读取默认的线程数
-	fmt.Println(runtime.GOMAXPROCS(0))
-	// 设置默认的线程数
-	runtime.GOMAXPROCS(10)
-	fmt.Println(runtime.GOMAXPROCS(0))
-
-	// 获取当前协程数量
-	fmt.Println(runtime.NumGoroutine())
-	for i := 0; i < 10; i++ {
-		go func() {
-			for {
-				time.Sleep(time.Second)
-			}
-		}()
-	}
-	fmt.Println(runtime.NumGoroutine())
-}
 
 func send(ch chan int) {
 	for {
