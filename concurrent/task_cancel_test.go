@@ -1,11 +1,12 @@
 package concurrent
 
 import (
+	"context"
 	"testing"
 	"time"
 )
 
-func isCanceled(cancelChan chan int) bool {
+func isCancelled(cancelChan chan int) bool {
 	select {
 	case <-cancelChan:
 		return true
@@ -29,7 +30,7 @@ func TestTaskClose(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		go func(i int, cancelCh chan int) {
 			for {
-				if isCanceled(cancelChan) {
+				if isCancelled(cancelChan) {
 					break
 				}
 				time.Sleep(time.Millisecond * 5)
@@ -40,5 +41,32 @@ func TestTaskClose(t *testing.T) {
 	// cancel1(cancelChan)
 	cancel2(cancelChan)
 
+	time.Sleep(time.Second)
+}
+
+// 使用context取消任务，则可以取消该任务的子任务
+func isCancelledByCtx(ctx context.Context) bool {
+	select {
+	case <-ctx.Done():
+		return true
+	default:
+		return false
+	}
+}
+
+func TestTaskCtxClose(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	for i := 0; i < 5; i++ {
+		go func(i int, ctx context.Context) {
+			for {
+				if isCancelledByCtx(ctx) {
+					break
+				}
+				time.Sleep(time.Millisecond * 5)
+			}
+			println(i, "cancelled")
+		}(i, ctx)
+	}
+	cancel()
 	time.Sleep(time.Second)
 }
