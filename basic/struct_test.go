@@ -67,8 +67,6 @@ func TestStruct(t *testing.T) {
 
 // Circle ...
 type Circle struct {
-	x      int
-	y      int
 	Radius int
 }
 

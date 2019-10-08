@@ -9,16 +9,16 @@ import (
 	"github.com/go-redis/redis"
 )
 
-var lessError = errors.New("the number should not less than 2")
-var bigError = errors.New("the number should not big than 100")
+var errLess = errors.New("the number should not less than 2")
+var errBig = errors.New("the number should not big than 100")
 
 // 一、 一般的错误处理方式
 func GetFib(n int) ([]int, error) {
 	if n < 2 {
-		return nil, lessError
+		return nil, errLess
 	}
 	if n > 100 {
-		return nil, bigError
+		return nil, errBig
 	}
 	fiblist := []int{1, 1}
 	for i := 2; i < n; i++ {
@@ -29,10 +29,10 @@ func GetFib(n int) ([]int, error) {
 
 func TestFib(t *testing.T) {
 	list, err := GetFib(101)
-	if err == lessError {
+	if err == errLess {
 		t.Error("need a bigger number")
 	}
-	if err == bigError {
+	if err == errBig {
 		t.Error("need a smaller number")
 	}
 	if err != nil {

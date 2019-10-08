@@ -7,7 +7,6 @@ import (
 
 // 一、 简单的接口示例
 type GoPrograme struct {
-	name string
 }
 type Programe interface {
 	hello() string
@@ -18,8 +17,7 @@ func (g *GoPrograme) hello() string {
 }
 func TestInterface4(t *testing.T) {
 	g := &GoPrograme{}
-	var p Programe
-	p = g
+	var p Programe = g
 	t.Log(p.hello())
 }
 
@@ -80,20 +78,6 @@ func (e Employee) SpendSalary(amount float32) {
 type Men interface {
 	SayHi()
 	Sing(lyrics string)
-}
-
-// YoungChap ...
-type YoungChap interface {
-	SayHi()
-	Sing(song string)
-	BorrowMoney(amount float32)
-}
-
-// ElderlyGent ...
-type ElderlyGent interface {
-	SayHi()
-	Sing(song string)
-	SpendSalary(amount float32)
 }
 
 // TestInterface ...

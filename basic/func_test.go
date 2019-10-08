@@ -30,17 +30,11 @@ func TestAdd(t *testing.T) {
 type testInt func(int) bool
 
 func isOdd(integer int) bool {
-	if integer%2 == 0 {
-		return false
-	}
-	return true
+	return integer%2 != 0
 }
 
 func isEven(integer int) bool {
-	if integer%2 == 0 {
-		return true
-	}
-	return false
+	return integer%2 == 0
 }
 
 func filter(slice []int, f testInt) []int {
@@ -61,4 +55,26 @@ func TestFunc(t *testing.T) {
 	t.Log("odd = ", odd)
 	even := filter(slice, isEven)
 	t.Log("even = ", even)
+}
+
+func sum(ops ...int) int {
+	ret := 0
+	for _, op := range ops {
+		ret += op
+	}
+	return ret
+}
+
+func TestMiltiVars(t *testing.T) {
+	t.Log(sum(1, 2, 3, 4))
+}
+
+func clear() {
+	println("clear some resource")
+}
+
+func TestDefer(t *testing.T) {
+	defer clear()
+	println("start")
+	panic("some err")
 }
