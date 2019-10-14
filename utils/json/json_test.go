@@ -45,3 +45,31 @@ func TestEasyJson(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func BenchmarkEmbJson(b *testing.B) {
+	b.ResetTimer()
+	e := new(Employee)
+	for i := 0; i < b.N; i++ {
+		err := json.Unmarshal([]byte(jsonStr), e)
+		if err != nil {
+			b.Error(err)
+		}
+		if _, err := json.Marshal(e); err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+func BenchmarkEasyJson(b *testing.B) {
+	b.ResetTimer()
+	e := Employee{}
+	for i := 0; i < b.N; i++ {
+		err := e.UnmarshalJSON([]byte(jsonStr))
+		if err != nil {
+			b.Error(err)
+		}
+		if _, err := e.MarshalJSON(); err != nil {
+			b.Error(err)
+		}
+	}
+}
