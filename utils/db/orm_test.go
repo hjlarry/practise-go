@@ -1,9 +1,9 @@
-package main
+package db
 
 import (
-	"fmt"
 	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql"
+	"testing"
 	"time"
 )
 
@@ -15,27 +15,27 @@ func init() {
 
 }
 
-func testOrm() {
+func TestOrm(t *testing.T) {
 	o := orm.NewOrm()
-	//author := Author{Name: "hehe"}
-	//
-	//id, err := o.Insert(&author)
-	//fmt.Printf("ID: %d, ERR: %v\n", id, err)
-	//
-	//author.Name = "ahah"
-	//num, err := o.Update(&author)
-	//fmt.Printf("Num: %d, ERR: %v\n", num, err)
-	//
-	//a := Author{Id: author.Id}
-	//err = o.Read(&a)
-	//fmt.Printf("author: %d, ERR: %v\n", a, err)
+	author := Author{Name: "hehe"}
+
+	id, err := o.Insert(&author)
+	t.Logf("ID: %d, ERR: %v\n", id, err)
+
+	author.Name = "ahah"
+	num, err := o.Update(&author)
+	t.Logf("Num: %d, ERR: %v\n", num, err)
+
+	a := Author{Id: author.Id}
+	err = o.Read(&a)
+	t.Logf("author: %v, ERR: %v\n", a, err)
 
 	// 插入数据
 	var user User
 	user.Name = "zxxx"
-	id, err := o.Insert(&user)
-	fmt.Println(id)
-	fmt.Println(err)
+	id, err = o.Insert(&user)
+	t.Log(id)
+	t.Log(err)
 
 	// 批量插入数据
 	users := []User{
@@ -44,24 +44,24 @@ func testOrm() {
 		{Name: "unknown"},
 	}
 	successNums, err := o.InsertMulti(100, users)
-	fmt.Println(successNums)
-	fmt.Println(err)
+	t.Log(successNums)
+	t.Log(err)
 
 	// 根据主键获取数据
 	user = User{Id: 3}
 	err = o.Read(&user)
 	if err == orm.ErrNoRows {
-		fmt.Println("查询不到")
+		t.Log("查询不到")
 	} else if err == orm.ErrMissPK {
-		fmt.Println("找不到主键")
+		t.Log("找不到主键")
 	} else {
-		fmt.Println(user.Id, user.Name)
+		t.Log(user.Id, user.Name)
 	}
 
 	// 高级查询方式
 	var user2 User
 	err = o.QueryTable("user").Filter("Id", 1).One(&user2)
-	fmt.Println(user2)
+	t.Log(user2)
 
 }
 
@@ -78,15 +78,15 @@ type Userinfo struct {
 }
 
 type User struct {
-	Id      int
-	Name    string
+	Id   int
+	Name string
 	//Profile *Profile `orm:"rel(one)"`      // OneToOne relation
-	Post    []*Post  `orm:"reverse(many)"` // 设置一对多的反向关系
+	Post []*Post `orm:"reverse(many)"` // 设置一对多的反向关系
 }
 
 type Profile struct {
-	Id   int
-	Age  int16
+	Id  int
+	Age int16
 	//User *User `orm:"reverse(one)"` // 设置一对一反向关系(可选)
 }
 

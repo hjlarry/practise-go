@@ -1,4 +1,4 @@
-package main
+package http
 
 import (
 	"crypto/md5"
@@ -10,9 +10,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"testing"
 	"time"
 )
-
 
 func sayhelloName(w http.ResponseWriter, r *http.Request) {
 	_ = r.ParseForm()
@@ -89,7 +89,7 @@ func upload(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func testHTTP() {
+func TestHTTP(t *testing.T) {
 	http.HandleFunc("/", sayhelloName)
 	http.HandleFunc("/login", login)
 	http.HandleFunc("/upload", upload)
@@ -98,4 +98,3 @@ func testHTTP() {
 		log.Fatal("listen And Serve:", err)
 	}
 }
-

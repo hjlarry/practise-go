@@ -1,32 +1,32 @@
-package main
+package db
 
 import (
 	"database/sql"
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
+	"testing"
 )
 
-func testSQL() {
+func TestSQL(t *testing.T) {
 	db, err := sql.Open("mysql", "root:root@/beego?charset=utf8")
 	checkErr(err)
 
 	// 插入数据
-	stmt, err := db.Prepare("INSERT userinfo SET username=?,departname=?,created=?")
+	stmt, err := db.Prepare("INSERT userinfo SET name=?,departname=?,created=?")
 	checkErr(err)
 	res, err := stmt.Exec("astaxie", "研发部门", "2012-12-09")
 	checkErr(err)
 	id, err := res.LastInsertId()
 	checkErr(err)
-	fmt.Println(id)
+	t.Log(id)
 
 	// 更新数据
-	stmt, err = db.Prepare("update userinfo set username=? where uid=?")
+	stmt, err = db.Prepare("update userinfo set name=? where uid=?")
 	checkErr(err)
 	res, err = stmt.Exec("astaxieupdate", id)
 	checkErr(err)
 	affect, err := res.RowsAffected()
 	checkErr(err)
-	fmt.Println(affect)
+	t.Log(affect)
 
 	//	查询数据
 	rows, err := db.Query("SELECT * FROM userinfo")
@@ -39,10 +39,10 @@ func testSQL() {
 		var created string
 		err = rows.Scan(&uid, &username, &department, &created)
 		checkErr(err)
-		fmt.Println(uid)
-		fmt.Println(username)
-		fmt.Println(department)
-		fmt.Println(created)
+		t.Log(uid)
+		t.Log(username)
+		t.Log(department)
+		t.Log(created)
 	}
 }
 

@@ -1,4 +1,4 @@
-package main
+package session
 
 import (
 	"container/list"
@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
+	"testing"
 	"time"
 )
 
@@ -227,7 +228,7 @@ func count(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, sess.Get("countnum"))
 }
 
-func main() {
+func TestSession(t *testing.T) {
 	http.HandleFunc("/count", count)
 	err := http.ListenAndServe(":9090", nil)
 	if err != nil {

@@ -1,9 +1,10 @@
-package main
+package websocket
 
 import (
 	"fmt"
 	"log"
 	"net/http"
+	"testing"
 
 	"golang.org/x/net/websocket"
 )
@@ -31,7 +32,7 @@ func Echo(ws *websocket.Conn) {
 	}
 }
 
-func main() {
+func TestWs(t *testing.T) {
 	http.Handle("/", websocket.Handler(Echo))
 
 	if err := http.ListenAndServe(":1234", nil); err != nil {
