@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-// 内置的json模块使用了反射tag的模式，效率较低
 var jsonStr = `{
 	"basic_info":{
 	  	"name":"Mike",
@@ -16,18 +15,7 @@ var jsonStr = `{
 	}
 }`
 
-type BasicInfo struct {
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-}
-type JobInfo struct {
-	Skills []string `json:"skills"`
-}
-type Employee struct {
-	BasicInfo BasicInfo `json:"basic_info"`
-	JobInfo   JobInfo   `json:"job_info"`
-}
-
+// 内置的json模块使用了反射tag的模式，效率较低
 func TestEmbJson(t *testing.T) {
 	e := new(Employee)
 	err := json.Unmarshal([]byte(jsonStr), e)
@@ -37,6 +25,21 @@ func TestEmbJson(t *testing.T) {
 	t.Log(*e)
 
 	if v, err := json.Marshal(e); err == nil {
+		t.Log(string(v))
+	} else {
+		t.Error(err)
+	}
+}
+
+func TestEasyJson(t *testing.T) {
+	e := Employee{}
+	err := e.UnmarshalJSON([]byte(jsonStr))
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(e)
+
+	if v, err := e.MarshalJSON(); err == nil {
 		t.Log(string(v))
 	} else {
 		t.Error(err)
