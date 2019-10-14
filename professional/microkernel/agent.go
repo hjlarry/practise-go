@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"sync"
+	"fmt"
 )
 
 const (
@@ -60,7 +61,7 @@ func (agt *Agent) EventProcessGoroutine() {
 				return
 			}
 		}
-		println(evtSeg)
+		fmt.Println(evtSeg)
 	}
 }
 
