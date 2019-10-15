@@ -5,7 +5,6 @@ import (
 	"testing"
 )
 
-
 func TestVar(t *testing.T) {
 	// 有符号整数，可以表示正负
 	var a int8 = 1  // 1 字节
@@ -13,7 +12,8 @@ func TestVar(t *testing.T) {
 	var c int32 = 3 // 4 字节
 	var d int64 = 4 // 8 字节
 	t.Log(a, b, c, d)
-
+	t.Logf("%T", &a)
+	t.Logf("%T", *&a)
 	// 无符号整数，只能表示非负数
 	var ua uint8 = 1
 	var ub uint16 = 2
