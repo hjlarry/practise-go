@@ -3,6 +3,7 @@ package basic
 import (
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"testing"
 
@@ -120,8 +121,8 @@ func TestRedisConn(t *testing.T) {
 // 四、panic和普通退出
 func TestPanicExit(t *testing.T) {
 	t.Log("start")
-	// os.Exit(-1)
-	panic(errors.New("sth wrong"))
+	os.Exit(-1)
+	// panic(errors.New("sth wrong"))
 	t.Log("end")
 }
 
