@@ -7,10 +7,11 @@ func TestMap(t *testing.T) {
 	map1[3] = 19
 	t.Log(map1)
 
-	map2 := map[int]int{
-		1: 1,
-		2: 4,
-		3: 9,
+	map2 := map[int]struct {
+		x int
+	}{
+		1: {x: 100},
+		2: {x: 200},
 	}
 	t.Log(map2)
 
@@ -22,6 +23,10 @@ func TestMap(t *testing.T) {
 	map3[3] = 1
 	map3[4] = 1
 	t.Log(map3)
+
+	var m1 map[string]int //nil字典，未初始化，不能写入
+	m2 := map[string]int{}
+	t.Log(m1 == nil, m2 == nil)
 }
 
 func TestMapElement(t *testing.T) {
@@ -39,10 +44,31 @@ func TestMapElement(t *testing.T) {
 	v, exist = map1[3]
 	t.Log(v, exist)
 
-	// 遍历数组元素
+	// 删除元素，不存在不会报错
+	delete(map1, 4)
+
+	// 遍历数组元素，每次遍历顺序可能不同
 	for k, v := range map1 {
 		t.Log(k, v)
 	}
+}
+
+func TestModify(t *testing.T) {
+	type user struct {
+		name string
+		age  int
+	}
+	m := map[int]user{1: {"Tome", 19}}
+	// 字典是not addressable，不能直接修改value成员
+	// m[1].age += 1  错误：can not assign to struct field m[1].age in map
+	// 而应该先返回整个value，再更新map
+	u := m[1]
+	u.age += 1
+	m[1] = u
+	// 或使用指针类型的value
+	m2 := map[int]*user{1: &user{"Jack", 20}}
+	m2[1].age += 1
+	t.Log(m, m2, m2[1].age)
 }
 
 func TestMapForFunc(t *testing.T) {
@@ -72,5 +98,20 @@ func TestMapForSet(t *testing.T) {
 	delete(mySet, 2)
 	if !mySet[2] {
 		t.Log("not exist")
+	}
+}
+
+// 在迭代期间删除或新增键值对是安全的
+func TestIterMap(t *testing.T) {
+	m := make(map[int]int)
+	for i := 0; i < 10; i++ {
+		m[i] = i + 10
+	}
+	for k := range m {
+		if k == 5 {
+			m[100] = 1000
+		}
+		delete(m, k)
+		t.Log(k, m)
 	}
 }
