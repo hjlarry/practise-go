@@ -165,18 +165,18 @@ func TestMapConcurrentWithLock(t *testing.T) {
 	select {} //阻止进程退出
 }
 
-func test(x map[string]int) {
+func testmm(x map[string]int) {
 	fmt.Printf("x: %p \n", x)
 }
 
 // 字典对象本身就是指针的包装，传参时无须再次取地址
 func TestMapTransfer(t *testing.T) {
 	m := make(map[string]int)
-	test(m)
+	testmm(m)
 	t.Logf("m: %p, %d", m, unsafe.Sizeof(m))
 
 	m2 := map[string]int{}
-	test(m2)
+	testmm(m2)
 	t.Logf("m2: %p, %d", m2, unsafe.Sizeof(m2))
 }
 

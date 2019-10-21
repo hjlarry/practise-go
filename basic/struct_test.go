@@ -194,3 +194,85 @@ func TestStructFunc(t *testing.T) {
 	t.Log(p.String1())
 	t.Log(p.String2())
 }
+
+func TestStructMemory(t *testing.T) {
+	// 内存总是一次性分配，各字段在相邻的地址空间按顺序排序
+	type point struct {
+		x, y, z int
+	}
+	type value struct {
+		id   int
+		name string
+		data []byte
+		next *value
+		point
+	}
+
+	v := value{
+		id:    1,
+		name:  "test",
+		data:  []byte{1, 2, 3, 4},
+		point: point{x: 100, y: 200, z: 300},
+	}
+
+	s := `
+		v: %p~%x, size: %d, align: %d
+		field  address     offset   size
+		----------+----------+-------+---------
+		id        %p         %d      %d
+		name      %p         %d      %d
+		data      %p         %d      %d
+		next      %p         %d      %d
+		x         %p         %d      %d
+		z         %p         %d      %d
+	`
+	t.Logf(s,
+		&v, uintptr(unsafe.Pointer(&v))+unsafe.Sizeof(v), unsafe.Sizeof(v), unsafe.Alignof(v),
+		&v.id, unsafe.Offsetof(v.id), unsafe.Sizeof(v.id),
+		&v.name, unsafe.Offsetof(v.name), unsafe.Sizeof(v.name),
+		&v.data, unsafe.Offsetof(v.data), unsafe.Sizeof(v.data),
+		&v.next, unsafe.Offsetof(v.next), unsafe.Sizeof(v.next),
+		&v.x, unsafe.Offsetof(v.x), unsafe.Sizeof(v.x),
+		&v.z, unsafe.Offsetof(v.z), unsafe.Sizeof(v.z),
+	)
+
+	// 字段做对齐处理时，通常以所有字段中最长的基础类型宽度为标准
+	v1 := struct {
+		a byte
+		b byte
+		c int32 // 对齐宽度为4
+	}{}
+	v2 := struct {
+		a byte
+		b byte // 对齐宽度为1
+	}{}
+	v3 := struct {
+		a byte
+		b []int // 基础类型int，对齐宽度为8
+		c byte
+	}{}
+	t.Logf("v1: %d, %d", unsafe.Alignof(v1), unsafe.Sizeof(v1))
+	t.Logf("v2: %d, %d", unsafe.Alignof(v2), unsafe.Sizeof(v2))
+	t.Logf("v3: %d, %d", unsafe.Alignof(v3), unsafe.Sizeof(v3))
+
+	vv := struct {
+		a struct{}
+		b int
+		c struct{} // 最后一个字段若是空结构类型字段，则会把它当做长度为1的类型做对齐处理，以免地址越界
+	}{}
+
+	ss := `
+		v: %p~%x, size: %d, align: %d
+		field  address     offset   size
+		----------+----------+-------+---------
+		a         %p         %d      %d
+		b         %p         %d      %d
+		c         %p         %d      %d
+	`
+	t.Logf(ss,
+		&vv, uintptr(unsafe.Pointer(&vv))+unsafe.Sizeof(vv), unsafe.Sizeof(vv), unsafe.Alignof(vv),
+		&vv.a, unsafe.Offsetof(vv.a), unsafe.Sizeof(vv.a),
+		&vv.b, unsafe.Offsetof(vv.b), unsafe.Sizeof(vv.b),
+		&vv.c, unsafe.Offsetof(vv.c), unsafe.Sizeof(vv.c),
+	)
+}

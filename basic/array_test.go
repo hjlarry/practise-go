@@ -63,7 +63,7 @@ func TestArrayPtr(t *testing.T) {
 	t.Log(q[1])
 }
 
-func test(x [2]int) {
+func testaa(x [2]int) {
 	fmt.Printf("x: %p, %v\n", &x, x)
 }
 
@@ -76,5 +76,5 @@ func TestArrayPassVal(t *testing.T) {
 	t.Logf("a :%p, %v", &a, a)
 	t.Logf("b :%p, %v", &b, b)
 
-	test(a)
+	testaa(a)
 }
