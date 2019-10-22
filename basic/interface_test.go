@@ -5,115 +5,80 @@ import (
 	"testing"
 )
 
-// 一、 简单的接口示例
-type GoPrograme struct {
+/* 一、 简单的接口示例 */
+// 接口一般用er结尾命名
+type tester interface {
+	test()
+	string() string
 }
-type Programe interface {
-	hello() string
-}
+type dd struct{}
 
-func (g *GoPrograme) hello() string {
-	return "hello go"
-}
-func TestInterface4(t *testing.T) {
-	g := &GoPrograme{}
-	var p Programe = g
-	t.Log(p.hello())
+func (*dd) test() {}
+func (dd) string() string {
+	return "ss"
 }
 
-// 二、 复杂的接口示例
-// Human ...
-type Human struct {
-	name  string
-	age   int
-	phone string
+func TestSimpleInterface(t *testing.T) {
+	var d dd
+	// var tt tester = d  报错：missing method test，编译器根据方法集判断是否实现了接口
+	var tt tester = &d
+	tt.test()
+	t.Log(tt.string())
 }
 
-// Student ...
-type Student struct {
-	Human  //匿名字段Human
-	school string
-	loan   float32
+func TestEmptyInterface(t *testing.T) {
+	var t1, t2 interface{}
+	t.Log(t1 == t2)
+
+	t1, t2 = 100, 100
+	t.Log(t1 == t2)
+
+	// 报错，必须实现接口的类型支持比较才能比较
+	t1, t2 = map[int]int{}, map[int]int{}
+	t.Log(t1 == t2)
 }
 
-// Employee ...
-type Employee struct {
-	Human   //匿名字段Human
-	company string
-	money   float32
+type smaller interface {
+	string() string
 }
 
-// SayHi ... Human对象实现Sayhi方法
-func (h Human) SayHi() {
-	fmt.Printf("Hi, I am %s you can call me on %s\n", h.name, h.phone)
+type bigger interface {
+	smaller //嵌入其他接口
+	test()
 }
 
-// Sing ... Human对象实现Sing方法
-func (h Human) Sing(lyrics string) {
-	fmt.Println("La la, la la la, la la la la la...", lyrics)
+func qq(a smaller) {
+	println(a.string())
+}
+func TestEmbedInterface(t *testing.T) {
+	var d dd
+	var big bigger = &d
+	big.test()
+	t.Log(big.string())
+
+	qq(big)             // 可隐式转换为子集接口
+	var s smaller = big // 超集转换为子集
+	t.Log(s.string())
+	// var t bigger = s   子集无法转换为超集,missing method test
 }
 
-// Guzzle ... Human对象实现Guzzle方法
-func (h Human) Guzzle(beerStein string) {
-	fmt.Println("Guzzle Guzzle Guzzle...", beerStein)
-}
-
-// SayHi ... Employee重载Human的Sayhi方法
-func (e Employee) SayHi() {
-	fmt.Printf("Hi, I am %s, I work at %s. Call me on %s\n", e.name,
-		e.company, e.phone) //此句可以分成多行
-}
-
-// BorrowMoney ...Student实现BorrowMoney方法
-func (s Student) BorrowMoney(amount float32) {
-	s.loan += amount // (again and again and...)
-}
-
-// SpendSalary ... Employee实现SpendSalary方法
-func (e Employee) SpendSalary(amount float32) {
-	e.money -= amount // More vodka please!!! Get me through the day!
-}
-
-// Men ...
-type Men interface {
-	SayHi()
-	Sing(lyrics string)
-}
-
-// TestInterface ...
-func TestInterface(t *testing.T) {
-	mike := Student{Human{"Mike", 25, "222-222-XXX"}, "MIT", 0.00}
-	paul := Student{Human{"Paul", 26, "111-222-XXX"}, "Harvard", 100}
-	sam := Employee{Human{"Sam", 36, "444-222-XXX"}, "Golang Inc.", 1000}
-	tom := Employee{Human{"Tom", 37, "222-444-XXX"}, "Things Ltd.", 5000}
-
-	//定义Men类型的变量i
-	var i Men
-
-	//i能存储Student
-	i = mike
-	fmt.Println("This is Mike, a Student:")
-	i.SayHi()
-	i.Sing("November rain")
-
-	//i也能存储Employee
-	i = tom
-	fmt.Println("This is tom, an Employee:")
-	i.SayHi()
-	i.Sing("Born to be wild")
-
-	//定义了slice Men
-	fmt.Println("Let's use a slice of Men and see what happens")
-	x := make([]Men, 3)
-	//这三个都是不同类型的元素，但是他们实现了interface同一个接口
-	x[0], x[1], x[2] = paul, sam, mike
-
-	for _, value := range x {
-		value.SayHi()
+type node struct {
+	data interface { //匿名接口类型
+		string() string
 	}
 }
 
-// 三、 多态
+func TestAnymousInterface(t *testing.T) {
+	var tt interface { // 定义匿名接口变量
+		string() string
+	} = dd{}
+	n := node{
+		data: tt,
+	}
+	t.Log(n.data.string())
+}
+
+// 二、 多态
 type fruitable interface {
 	eat()
 }
@@ -157,8 +122,7 @@ func TestInterface3(t *testing.T) {
 	eatInterface(b)
 }
 
-// 四、空接口断言
-
+// 三、空接口断言
 func dosomething(any interface{}) {
 	// if i, ok := any.(int); ok {
 	// 	println("it`s interger:", i)
@@ -184,4 +148,59 @@ func TestInterface5(t *testing.T) {
 	dosomething(b)
 	p := &b
 	dosomething(p)
+}
+
+type myint int
+
+func (d myint) String() string{
+	return fmt.Sprintf("data: %d", d)
+}
+func TestInterfaceConversion(t *testing.T){
+	var d myint = 15
+	var x interface{} = d
+
+	if n, ok := x.(fmt.Stringer); ok{  // 转换为更具体的接口类型
+		t.Log(n)
+		t.Log(x)
+	}
+
+	if d2, ok:= x.(myint);ok{  // 转换为原始的类型
+		t.Log(d2)
+	}
+
+	// 错误，interface conversion: basic.myint is not error: missing method Error [recovered]
+	// ok-idom模式可避免引发panic
+	// e:=x.(error)  
+	// t.Log(e)
+
+	// 使用switch在多种类型间做匹配
+	var i interface{} = func(x int) string{
+		return fmt.Sprintf("d: %d", x)
+	}
+	switch v:= i.(type){
+	case nil:
+		t.Log("nil")
+	case *int:
+		t.Log("*int")
+	case func(int) string:
+		t.Log(v(100))
+	case fmt.Stringer:
+		t.Log(v)
+	default:
+		t.Log("unknown")
+	}
+}
+
+// 定义函数类型，让相同签名的函数自动实现某接口
+type FuncString func() string
+func(f FuncString) String() string{
+	return f()
+}
+
+func TestFuncString(t *testing.T){
+	var tt fmt.Stringer = FuncString(func() string{
+		// 转换类型，使其实现Stringer接口
+		return "hello world"
+	})
+	t.Log(tt)
 }
