@@ -3,6 +3,7 @@ package professional
 import (
 	"fmt"
 	"reflect"
+	"strings"
 	"testing"
 	"unsafe"
 
@@ -282,4 +283,80 @@ func TestRelectValue(t *testing.T) {
 	var ib interface{} = (*int)(nil)
 	t.Log(ia == nil, ib == nil)
 	t.Log(reflect.ValueOf(ib).IsNil())
+}
+
+type X struct{}
+
+func (X) Test(x, y int) (int, error) {
+	return x + y, fmt.Errorf("err: %d", x+y)
+}
+
+func (X) Format(s string, a ...interface{}) string {
+	return fmt.Sprintf(s, a...)
+}
+
+func TestReflectMethod(t *testing.T) {
+	var x X
+	v := reflect.ValueOf(&x)
+	m := v.MethodByName("Test")
+	in := []reflect.Value{
+		reflect.ValueOf(1),
+		reflect.ValueOf(2),
+	}
+	out := m.Call(in)
+	for _, v := range out {
+		t.Log(v)
+	}
+
+	// 对于变参，CallSlice更方便一些
+	m2 := v.MethodByName("Format")
+	out = m2.Call([]reflect.Value{
+		reflect.ValueOf("%s=%d"),
+		reflect.ValueOf("x"),
+		reflect.ValueOf(101),
+	})
+	t.Log(out)
+	out = m2.CallSlice([]reflect.Value{
+		reflect.ValueOf("%s=%d"),
+		reflect.ValueOf([]interface{}{"x", 102}),
+	})
+	t.Log(out)
+}
+
+func add(args []reflect.Value) (results []reflect.Value) {
+	if len(args) == 0 {
+		return nil
+	}
+	var ret reflect.Value
+	switch args[0].Kind() {
+	case reflect.Int:
+		n := 0
+		for _, a := range args {
+			n += int(a.Int())
+		}
+		ret = reflect.ValueOf(n)
+	case reflect.String:
+		ss := make([]string, 0, len(args))
+		for _, s := range args {
+			ss = append(ss, s.String())
+		}
+		ret = reflect.ValueOf(strings.Join(ss, ""))
+	}
+	results = append(results, ret)
+	return
+}
+
+func makeAdd(fptr interface{}) {
+	fn := reflect.ValueOf(fptr).Elem()
+	v := reflect.MakeFunc(fn.Type(), add) //实现通用模板，对应不同类型
+	fn.Set(v)
+}
+
+func TestReflectMakeFunc(t *testing.T) {
+	var intAdd func(x, y int) int
+	var strAdd func(a, b string) string
+	makeAdd(&intAdd)
+	makeAdd(&strAdd)
+	t.Log(intAdd(100, 200))
+	t.Log(strAdd("hello ", "world"))
 }
