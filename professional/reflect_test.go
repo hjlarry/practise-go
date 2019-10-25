@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"unsafe"
 
 	"github.com/pkg/errors"
 )
@@ -226,4 +227,59 @@ func TestAssitMethod(t *testing.T) {
 	t.Log(tt.ConvertibleTo(it))
 
 	t.Log(tt.AssignableTo(st), tt.AssignableTo(it))
+}
+
+type User struct {
+	Name string
+	code int
+}
+
+func TestRelectValue(t *testing.T) {
+	a := 100
+	va, vp := reflect.ValueOf(a), reflect.ValueOf(&a).Elem()
+	t.Log(va.CanAddr(), va.CanSet()) // 接口变量会复制变量，且unaddressable
+	t.Log(vp.CanAddr(), vp.CanSet())
+
+	p := new(User)
+	v := reflect.ValueOf(p).Elem()
+	name := v.FieldByName("Name")
+	code := v.FieldByName("code")
+	t.Logf("name: can addr= %v, can set = %v", name.CanAddr(), name.CanSet())
+	t.Logf("code: can addr= %v, can set = %v", code.CanAddr(), code.CanSet())
+	if name.CanSet() {
+		name.SetString("Tom")
+	}
+	// 非导出字段不能直接设置
+	if code.CanAddr() {
+		*(*int)(unsafe.Pointer(code.UnsafeAddr())) = 100
+	}
+	t.Logf("%+v", *p)
+
+	// 通过Interface方法进行类型推断和转换，也可通过Value.Int等方法进行类型转换，但不支持ok-idom，失败会panic
+	u := User{"hjl", 30}
+	d := reflect.ValueOf(&u)
+	if !d.CanInterface() {
+		println("Can interface fall")
+		return
+	}
+	p, ok := d.Interface().(*User)
+	if !ok {
+		println("Can interface fall")
+		return
+	}
+	p.code++
+	t.Logf("%+v", u)
+
+	// channel对象设置示例
+	c := make(chan int, 4)
+	vc := reflect.ValueOf(c)
+	if vc.TrySend(reflect.ValueOf(100)) {
+		t.Log(vc.TryRecv())
+	}
+
+	// 接口有两种nil状态，可用IsNil判断
+	var ia interface{} = nil
+	var ib interface{} = (*int)(nil)
+	t.Log(ia == nil, ib == nil)
+	t.Log(reflect.ValueOf(ib).IsNil())
 }
