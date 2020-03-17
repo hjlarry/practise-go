@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package proto;
+
+//protoc hello.proto --go_out=plugins=grpc:.
+
+service HelloService {
+    rpc Hello (HelloRequest) returns (HelloReply) {
+    }
+
+    rpc SayHelloAgain (HelloRequest) returns (HelloReply) {
+    }
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloReply {
+    string message = 1;
+}
