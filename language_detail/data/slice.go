@@ -51,7 +51,7 @@ import (
 
 // go build slice.go && GODEBUG=gctrace=1 ./slice
 // 应避免长时间引用大数组
-func test() []byte {
+func test_slice() []byte {
 	s := make([]byte, 0, 100<<20)
 	s = append(s, 1, 2, 3, 4)
 	// 直接return 内存无法释放
@@ -63,7 +63,7 @@ func test() []byte {
 }
 
 func main() {
-	s := test()
+	s := test_slice()
 	for {
 		fmt.Println(s)
 		runtime.GC()
