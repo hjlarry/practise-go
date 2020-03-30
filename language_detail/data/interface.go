@@ -1,7 +1,43 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
+/* 一、 简单的接口示例 */
+// 接口一般用er结尾命名
+//type tester interface {
+//	test()
+//	string() string
+//}
+//type dd struct{}
+//
+//func (*dd) test() {}
+//func (dd) string() string {
+//	return "ss"
+//}
+//
+//func main() {
+//	var d dd
+//	// var tt tester = d  报错：missing method test，编译器根据方法集判断是否实现了接口
+//	var tt tester = &d
+//	tt.test()
+//	fmt.Println(tt.string())
+//
+//	// 接口比较
+//	var t1, t2 interface{}
+//	fmt.Println(t1 == t2)
+//
+//	t1, t2 = 100, 100
+//	fmt.Println(t1 == t2)
+//
+//	// 报错，必须实现接口的类型 支持比较才能比较
+//	t1, t2 = map[int]int{}, map[int]int{}
+//	fmt.Println(t1 == t2)
+//}
+
+// --------------------------------------------------------------------------
+// 二、接口反汇编
 // type Xer interface {
 // 	MethodA(a int)
 // 	MethodB()
@@ -64,7 +100,7 @@ go build -gcflags "-l -N" interface.go && go tool objdump -s "main\.main" interf
 */
 
 // --------------------------------------------------------------------------
-// 编译器根据方法集判断接口实现
+// 三、编译器根据方法集判断接口实现
 // type X int
 
 // func (x *X) test() {}
@@ -83,7 +119,7 @@ go build -gcflags "-l -N" interface.go && go tool objdump -s "main\.main" interf
 // 	X does not implement Xer (test method has pointer receiver)
 
 // --------------------------------------------------------------------------
-
+// 四、通过gdb观察
 // type X int
 
 // func (x *X) test() {}
@@ -133,7 +169,7 @@ main.(*X).test in section .text of /root/.mac/gocode/interface
 */
 
 // --------------------------------------------------------------------------
-
+// 五、匿名接口
 // type X int
 
 // func (x *X) test() {}
@@ -148,6 +184,7 @@ main.(*X).test in section .text of /root/.mac/gocode/interface
 // }
 
 // --------------------------------------------------------------------------
+// 六、接口嵌入
 // 接口嵌入和结构体嵌入不同，相当于嵌入并展开，而结构体嵌入有层级关系
 // type Aer interface {
 // 	MethodA()
@@ -176,22 +213,54 @@ main.(*X).test in section .text of /root/.mac/gocode/interface
 // }
 
 // --------------------------------------------------------------------------
+// 七、 多态
+//type fruitable interface {
+//	eat()
+//}
+//
+//type fruit struct {
+//	name string
+//	fruitable
+//}
+//
+//func (f fruit) want() {
+//	f.eat()
+//}
+//
+//type apple struct{}
+//
+//func (a apple) eat() {
+//	fmt.Println("eat apple")
+//}
+//
+//type banana struct{}
+//
+//func (b banana) eat() {
+//	fmt.Println("eat banana")
+//}
+//
+//func eatInterface(f fruitable) {
+//	f.eat()
+//}
+//
+//// 通过接口模拟其他语言的多态
+//func main() {
+//	// 使用结构体的组合实现的多态
+//	var app = fruit{"Apple", apple{}}
+//	app.want()
+//	var bana = fruit{"Banana", banana{}}
+//	bana.want()
+//	// 直接使用接口实现的多态
+//	a := &apple{}
+//	b := &banana{}
+//	eatInterface(a)
+//	eatInterface(b)
+//}
 
-// func main() {
-// 	var o *int = nil
-// 	var a interface{} = o // {type: *int, data:nil}
-// 	var b interface{}     // {type: nil, data:nil}
-// 	println(a == nil, b == nil)
-
-// 	// 那么只能通过反射来判断a是否为nil
-// 	v := reflect.ValueOf(a)
-// 	if v.IsValid() {
-// 		println(v.IsNil())
-// 	}
-// }
 
 // --------------------------------------------------------------------------
-// 接口转换方式一
+// 八、接口断言
+// 1. 方式一
 // type Xer interface {
 // 	A()
 // }
@@ -206,7 +275,7 @@ main.(*X).test in section .text of /root/.mac/gocode/interface
 // }
 
 // --------------------------------------------------------------------------
-// 接口转换方式二
+// 2. 方式二
 // func main() {
 // 	var x interface{} = func(x int) string {
 // 		return fmt.Sprintf("d:%d", x)
@@ -226,26 +295,56 @@ main.(*X).test in section .text of /root/.mac/gocode/interface
 // }
 
 // --------------------------------------------------------------------------
+// 九、判断变量是否为nil
+// func main() {
+// 	var o *int = nil
+// 	var a interface{} = o // {type: *int, data:nil}
+// 	var b interface{}     // {type: nil, data:nil}
+// 	println(a == nil, b == nil)
 
-type X struct {
-	o int
+// 	// 那么只能通过反射来判断a是否为nil
+// 	v := reflect.ValueOf(a)
+// 	if v.IsValid() {
+// 		println(v.IsNil())
+// 	}
+// }
+
+// --------------------------------------------------------------------------
+// 十、通过hack的方式修改接口
+//type X struct {
+//	o int
+//}
+//
+//func main() {
+//	b := X{100}
+//	var e interface{} = b
+//	// 可以通过类型转换后读取该字段
+//	println(e.(X).o)
+//	// 但不可写，因为接口的data是私有的，不可寻址的
+//	// e.(X).o = 200
+//
+//	// 那么我们可以通过让接口的data持有一个指针
+//	var f interface{} = &b
+//	// 然后获取这个指针并修改数据
+//	p := f.(*X)
+//	(*p).o = 200
+//	fmt.Println(b)
+//	// 简写为
+//	f.(*X).o = 300
+//	fmt.Println(b)
+//}
+
+// --------------------------------------------------------------------------
+// 十一、定义函数类型，让相同签名的函数自动实现某接口
+type FuncString func() string
+func(f FuncString) String() string{
+	return f()
 }
 
-func main() {
-	b := X{100}
-	var e interface{} = b
-	// 可以通过类型转换后读取该字段
-	println(e.(X).o)
-	// 但不可写，因为接口的data是私有的，不可寻址的
-	// e.(X).o = 200
-
-	// 那么我们可以通过让接口的data持有一个指针
-	var f interface{} = &b
-	// 然后获取这个指针并修改数据
-	p := f.(*X)
-	(*p).o = 200
-	fmt.Println(b)
-	// 简写为
-	f.(*X).o = 300
-	fmt.Println(b)
+func main(){
+	var tt fmt.Stringer = FuncString(func() string{
+		// 转换类型，使其实现Stringer接口
+		return "hello world"
+	})
+	fmt.Println(tt)
 }
