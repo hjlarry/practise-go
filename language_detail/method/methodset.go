@@ -1,7 +1,39 @@
 package main
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
+// 一、 方法集仅影响接口实现和方法表达式转换，与通过实例或实例指针调用方法无关
+type S struct{}
+type T struct {
+	S
+}
 
+func (S) SVal()  {}
+func (*S) SPtr() {}
+func (T) TVal()  {}
+func (*T) TPtr() {}
+
+//
+func methodSet(a interface{}) {
+	t := reflect.TypeOf(a)
+	fmt.Println(t)
+	// NumMethod返回所有公开的方法
+	for i, n := 0, t.NumMethod(); i < n; i++ {
+		m := t.Method(i)
+		fmt.Println(m.Name, m.Type)
+	}
+}
+
+func main() {
+	var tt T
+	methodSet(tt)
+	fmt.Println("-----")
+	methodSet(&tt)
+}
+
+// 二、 原理
 // type X int
 
 // func (x X) A()  {}
@@ -40,22 +72,22 @@ import "reflect"
 // 在我们直接通过o.A()这样调用时，编译器会帮我们转化为call main.X.A(o)这样
 // 但当我们通过反射查看时，编译器会生成新的方法及签名，我们通过反汇编查看这些生成的方法指令，最终仍然是调用原方法
 // 这是因为反射是通过接口查看的，接口有严格的协议要求，编译器才会自动生成相应的方法
-type X int
-
-//go:noinline
-func (x X) A() {}
-
-//go:noinline
-func (x *X) B() {}
-
-type S struct {
-	X
-}
-
-func main() {
-	var o S
-	t := reflect.TypeOf(o)
-	for i := 0; i < t.NumMethod(); i++ {
-		println(t.Method(i).Name)
-	}
-}
+//type X int
+//
+////go:noinline
+//func (x X) A() {}
+//
+////go:noinline
+//func (x *X) B() {}
+//
+//type S struct {
+//	X
+//}
+//
+//func main() {
+//	var o S
+//	t := reflect.TypeOf(o)
+//	for i := 0; i < t.NumMethod(); i++ {
+//		println(t.Method(i).Name)
+//	}
+//}
