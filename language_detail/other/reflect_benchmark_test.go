@@ -1,4 +1,4 @@
-package professional
+package main
 
 import (
 	"reflect"

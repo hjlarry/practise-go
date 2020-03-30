@@ -1,4 +1,4 @@
-package professional
+package main
 
 import (
 	"fmt"
@@ -108,7 +108,7 @@ func checkType(v interface{}) {
 	case reflect.Float32, reflect.Float64:
 		println("it`s float")
 	default:
-		println("unknown type")
+		println("unknown other")
 	}
 }
 
@@ -155,7 +155,7 @@ func (e *Employee) UpdateAge(newVal int) {
 
 func TestInvokeByName(t *testing.T) {
 	e := Employee{"ss", "mike", 40}
-	t.Logf("value: %[1]v , type: %[1]T", reflect.ValueOf(e).FieldByName("name"))
+	t.Logf("value: %[1]v , other: %[1]T", reflect.ValueOf(e).FieldByName("name"))
 
 	if namefield, ok := reflect.TypeOf(e).FieldByName("name"); !ok {
 		t.Error("fail to get name")
@@ -169,13 +169,13 @@ func TestInvokeByName(t *testing.T) {
 
 func fillBySettings(st interface{}, settings map[string]interface{}) error {
 	if reflect.TypeOf(st).Kind() != reflect.Ptr {
-		return errors.New("the first param should be a pointer to the struct type")
+		return errors.New("the first param should be a pointer to the struct other")
 	}
 	// Elem方法签名: func (v Value) Elem() Value
 	// Elem returns the value that the interface v contains or that the pointer v points to.
 	// It panics if v's Kind is not Interface or Ptr. It returns the zero Value if v is nil.
 	if reflect.TypeOf(st).Elem().Kind() != reflect.Struct {
-		return errors.New("the first param should be a pointer to the struct type")
+		return errors.New("the first param should be a pointer to the struct other")
 	}
 
 	if settings == nil {
