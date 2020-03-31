@@ -78,7 +78,7 @@ func main() {
 	for i :=0;i<100;i++{ //创建大量goroutine
 		go func(){
 			sema <- i	//使得同时只能运行sema个goroutine
-			...			// 执行实际逻辑
+			//...			// 执行实际逻辑
 			<- sema
 		}()
 	}
