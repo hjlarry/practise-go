@@ -1,6 +1,9 @@
 package main
 
-import "runtime"
+import (
+	"runtime"
+	"testing"
+)
 
 // func main() {
 // 	c := make(chan struct{})
@@ -25,4 +28,27 @@ func main() {
 		println("c")
 	}()
 	runtime.Goexit()
+}
+
+// Goexit立即终止当前任务，但不能用在main.main
+func TestGoroutine8(t *testing.T) {
+	exit := make(chan struct{})
+	go func() {
+		defer close(exit)
+		defer println("a")
+		func() {
+			defer func() {
+				println("b", recover() == nil)
+			}()
+			func() {
+				println("c")
+				runtime.Goexit()
+				println("c done") //不执行
+			}()
+			println("b done") //不执行
+		}()
+		println("a done") //不执行
+	}()
+	<-exit
+	println("main exit") //执行
 }

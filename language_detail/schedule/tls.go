@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"sync"
+	"testing"
 	"time"
 )
 
@@ -23,4 +25,25 @@ func main() {
 	time.Sleep(time.Second)
 	fmt.Printf("%v", gs)
 
+}
+
+
+// TLS
+func TestGoroutine6(t *testing.T) {
+	var wg sync.WaitGroup
+	var gs [5]struct { // 用于实现类似TLS（局部存储）功能
+		id     int
+		result int
+	}
+
+	for i := 0; i < len(gs); i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			gs[id].id = id
+			gs[id].result = (id + 1) * 100
+		}(i)
+	}
+	wg.Wait()
+	t.Logf("%+v", gs)
 }

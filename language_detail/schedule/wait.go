@@ -2,6 +2,8 @@ package main
 
 import (
 	"sync"
+	"testing"
+	"time"
 )
 
 // 一、使用sleep等待goroutine执行
@@ -90,4 +92,34 @@ func main() {
 
 	println("main")
 	wg.Wait()
+}
+
+
+// 进程退出时并不会等待gorutine结束，可以使用通道阻塞并发出退出信号
+func TestGoroutine4(t *testing.T) {
+	exit := make(chan struct{})
+	go func() {
+		time.Sleep(time.Second * 3)
+		println("gorutine done")
+		close(exit)
+	}()
+	println("main")
+	<-exit
+	println("main done")
+}
+
+// 等待多个任务结束，可以使用WaitGroup
+func TestGoroutine5(t *testing.T) {
+	var wg sync.WaitGroup
+	for i := 0; i < 10; i++ {
+		wg.Add(1)
+		go func(id int) {
+			defer wg.Done()
+			time.Sleep(time.Second)
+			println("gorutine", id, "done")
+		}(i)
+	}
+	println("main")
+	wg.Wait()
+	println("main done")
 }
