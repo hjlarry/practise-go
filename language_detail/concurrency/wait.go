@@ -2,10 +2,9 @@ package main
 
 import (
 	"sync"
-	"testing"
-	"time"
 )
 
+// 进程退出时并不会等待gorutine结束，有一些方法可以等待goroutine执行
 // 一、使用sleep等待goroutine执行
 // import "time"
 
@@ -17,7 +16,8 @@ import (
 // 	time.Sleep(time.Second)
 // }
 
-// 二、使用通道发送信号
+// 二、使用通道阻塞住
+// 1. goroutine执行后可以发送个信号
 // func main() {
 // 	c := make(chan struct{})
 // 	go func() {
@@ -28,7 +28,7 @@ import (
 // 	<-c
 // }
 
-// 三、关闭通道来发送信号
+// 2. 可以关闭通道，也是一种发送信号
 // func main() {
 // 	c := make(chan struct{})
 // 	go func() {
@@ -39,7 +39,24 @@ import (
 // 	<-c
 // }
 
-// 四、多个goroutine编排顺序
+// 三、使用waitgroup等待
+func main() {
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go func() {
+		defer wg.Done()
+		println("a")
+	}()
+	go func() {
+		defer wg.Done()
+		println("b")
+	}()
+
+	println("main")
+	wg.Wait()
+}
+
+// 四、发送信号和关闭通道还可以给多个goroutine编排顺序
 // func main() {
 // 	a, b := make(chan struct{}), make(chan struct{})
 // 	go func() {
@@ -76,50 +93,3 @@ import (
 // 	close(x)
 // 	time.Sleep(time.Second)
 // }
-
-// 五、使用waitgroup等待
-func main() {
-	var wg sync.WaitGroup
-	wg.Add(2)
-	go func() {
-		defer wg.Done()
-		println("a")
-	}()
-	go func() {
-		defer wg.Done()
-		println("b")
-	}()
-
-	println("main")
-	wg.Wait()
-}
-
-
-// 进程退出时并不会等待gorutine结束，可以使用通道阻塞并发出退出信号
-func TestGoroutine4(t *testing.T) {
-	exit := make(chan struct{})
-	go func() {
-		time.Sleep(time.Second * 3)
-		println("gorutine done")
-		close(exit)
-	}()
-	println("main")
-	<-exit
-	println("main done")
-}
-
-// 等待多个任务结束，可以使用WaitGroup
-func TestGoroutine5(t *testing.T) {
-	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
-		wg.Add(1)
-		go func(id int) {
-			defer wg.Done()
-			time.Sleep(time.Second)
-			println("gorutine", id, "done")
-		}(i)
-	}
-	println("main")
-	wg.Wait()
-	println("main done")
-}

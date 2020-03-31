@@ -16,7 +16,7 @@ func test() {
 			// select {
 			// case <-c:
 			// default:
-			}
+			//}
 		}()
 	}
 }
