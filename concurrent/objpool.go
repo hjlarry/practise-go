@@ -1,8 +1,8 @@
-package concurrent
+package main
 
 import (
-	"github.com/pkg/errors"
-	"testing"
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -41,17 +41,17 @@ func (p *ObjPool) ReleaseObj(obj *ReusableObj) error {
 
 }
 
-func TestReusableObjPool(t *testing.T) {
+func main() {
 	pool := NewObjPool(5)
 	for i := 0; i < 5; i++ {
 		obj, err := pool.GetReusableObj(time.Second)
 		if err != nil {
-			t.Error(err)
+			fmt.Println(err)
 		}
-		t.Logf("%T", obj)
+		fmt.Printf("%T", obj)
 	}
 
 	for i := 0; i < 6; i++ {
-		t.Log(pool.ReleaseObj(new(ReusableObj)))
+		fmt.Println(pool.ReleaseObj(new(ReusableObj)))
 	}
 }
