@@ -48,7 +48,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Printf("%T", obj)
+		fmt.Printf("%T\n", obj)
 	}
 
 	for i := 0; i < 6; i++ {
