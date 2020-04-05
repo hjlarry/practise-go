@@ -4,36 +4,11 @@ import (
 	"context"
 	"fmt"
 	"runtime"
-	"sync"
 	"testing"
 	"time"
-	"unsafe"
 )
 
-/* 一、使用sync.Once在多个协程中只执行一次任务 */
-type Singleten struct{}
 
-var single *Singleten
-
-var once sync.Once
-
-func getSingleton() *Singleten {
-	once.Do(func() {
-		single = new(Singleten)
-		println("create success")
-	})
-	return single
-}
-
-func TestOnceTask(t *testing.T) {
-	for i := 0; i < 10; i++ {
-		go func() {
-			sin := getSingleton()
-			println(unsafe.Pointer(sin))
-		}()
-	}
-	time.Sleep(time.Second)
-}
 
 /* 二、多个任务执行时，当第一个任务完成时返回 */
 func runTask(id int) string {
