@@ -1,9 +1,10 @@
-package raft
+package main
 
 import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net/http"
 	"net/rpc"
 	"sync"
 	"time"
@@ -40,6 +41,17 @@ func newNode(addr string) *Node {
 	node := &Node{}
 	node.address = addr
 	return node
+}
+
+func (rf *Raft) rpc(port string) {
+	rpc.Register(rf)
+	rpc.HandleHTTP()
+	go func() {
+		err := http.ListenAndServe(port, nil)
+		if err != nil {
+			log.Fatalf("rpc err: %v \n", err)
+		}
+	}()
 }
 
 func (rf *Raft) start() {
