@@ -132,3 +132,23 @@ func (rf *Raft) sendRequestVote(nodeId int, args requestVoteArgs, reply *request
 		}
 	}
 }
+
+func (rf *Raft) RequestVote(args requestVoteArgs, reply requestVoteReply) error {
+	if args.Term < rf.currentTerm {
+		reply.Term = rf.currentTerm
+		reply.VoteGrant = false
+		return nil
+	}
+
+	if rf.voteFor == -1 {
+		rf.voteFor = args.Candidate
+		rf.currentTerm = args.Term
+		reply.Term = rf.currentTerm
+		reply.VoteGrant = true
+		return nil
+	}
+
+	reply.Term = rf.currentTerm
+	reply.VoteGrant = false
+	return nil
+}
