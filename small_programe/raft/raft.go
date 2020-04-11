@@ -2,7 +2,9 @@ package raft
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
+	"net/rpc"
 	"sync"
 	"time"
 )
@@ -81,6 +83,52 @@ func (rf *Raft) start() {
 	}()
 }
 
-func (rf *Raft) broadcastVoteRequest() {
+type requestVoteArgs struct {
+	Term      int
+	Candidate int
+}
 
+type requestVoteReply struct {
+	Term      int
+	VoteGrant bool
+}
+
+func (rf *Raft) broadcastVoteRequest() {
+	args := requestVoteArgs{
+		Term:      rf.currentTerm,
+		Candidate: rf.me,
+	}
+
+	for i := range rf.nodes {
+		go func(i int) {
+			var reply requestVoteReply
+			rf.sendRequestVote(i, args, &reply)
+		}(i)
+	}
+
+}
+
+func (rf *Raft) sendRequestVote(nodeId int, args requestVoteArgs, reply *requestVoteReply) {
+	client, err := rpc.Dial("tcp", rf.nodes[nodeId].address)
+	if err != nil {
+		log.Fatalf("rpc err: %v \n", err)
+	}
+	defer client.Close()
+
+	client.Call("Raft.RequestVote", args, reply)
+
+	if reply.Term > rf.currentTerm {
+		rf.currentTerm = reply.Term
+		rf.voteFor = -1
+		rf.role = Follower
+		return
+	}
+
+	if reply.VoteGrant {
+		rf.voteCount += 1
+
+		if rf.voteCount > len(rf.nodes)/2+1 {
+			rf.toLeaderCh <- true
+		}
+	}
 }
