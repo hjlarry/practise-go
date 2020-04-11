@@ -37,6 +37,10 @@ type Raft struct {
 	heartbeatCh chan bool
 }
 
+func (rf *Raft) String() string {
+	return fmt.Sprintf("Node: %d, role: %d, voteFor: %d", rf.me, rf.role, rf.voteFor)
+}
+
 func newNode(addr string) *Node {
 	node := &Node{}
 	node.address = addr
@@ -44,7 +48,7 @@ func newNode(addr string) *Node {
 }
 
 func (rf *Raft) rpc(port string) {
-	rpc.Register(rf)
+	_ = rpc.Register(rf)
 	rpc.HandleHTTP()
 	go func() {
 		err := http.ListenAndServe(port, nil)
@@ -68,11 +72,11 @@ func (rf *Raft) start() {
 			switch rf.role {
 			case Follower:
 				select {
-				case <-rf.heartbeatCh:
-					fmt.Printf("follower %d received heartbeat \n", rf.me)
 				case <-time.After(time.Duration(rand.Intn(500-300)+300) * time.Millisecond):
 					fmt.Printf("follower %d timeout \n", rf.me)
 					rf.role = Candidate
+				case <-rf.heartbeatCh:
+					fmt.Printf("follower %d received heartbeat \n", rf.me)
 				}
 			case Candidate:
 				fmt.Printf("Node: %d, candidate \n", rf.me)
@@ -84,10 +88,10 @@ func (rf *Raft) start() {
 
 				select {
 				case <-time.After(time.Duration(rand.Intn(500-300)+300) * time.Millisecond):
-					fmt.Printf("timeout, candiate %d become follower")
+					fmt.Printf("timeout, candiate %d become follower", rf.me)
 					rf.role = Follower
 				case <-rf.toLeaderCh:
-					fmt.Printf("candiate %d become leader")
+					fmt.Printf("candiate %d become leader", rf.me)
 					rf.role = Leader
 				}
 			case Leader:
@@ -98,39 +102,38 @@ func (rf *Raft) start() {
 	}()
 }
 
-type requestVoteArgs struct {
+type RequestVoteArgs struct {
 	Term      int
 	Candidate int
 }
 
-type requestVoteReply struct {
+type RequestVoteReply struct {
 	Term      int
 	VoteGrant bool
 }
 
 func (rf *Raft) broadcastVoteRequest() {
-	args := requestVoteArgs{
+	args := RequestVoteArgs{
 		Term:      rf.currentTerm,
 		Candidate: rf.me,
 	}
 
 	for i := range rf.nodes {
 		go func(i int) {
-			var reply requestVoteReply
+			var reply RequestVoteReply
 			rf.sendRequestVote(i, args, &reply)
 		}(i)
 	}
 
 }
 
-func (rf *Raft) sendRequestVote(nodeId int, args requestVoteArgs, reply *requestVoteReply) {
-	client, err := rpc.Dial("tcp", rf.nodes[nodeId].address)
+func (rf *Raft) sendRequestVote(nodeId int, args RequestVoteArgs, reply *RequestVoteReply) {
+	client, err := rpc.DialHTTP("tcp", rf.nodes[nodeId].address)
 	if err != nil {
 		log.Fatalf("rpc err: %v \n", err)
 	}
 	defer client.Close()
-
-	client.Call("Raft.RequestVote", args, reply)
+	_ = client.Call("Raft.RequestVote", args, reply)
 
 	if reply.Term > rf.currentTerm {
 		rf.currentTerm = reply.Term
@@ -148,7 +151,7 @@ func (rf *Raft) sendRequestVote(nodeId int, args requestVoteArgs, reply *request
 	}
 }
 
-func (rf *Raft) RequestVote(args requestVoteArgs, reply requestVoteReply) error {
+func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) error {
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
 		reply.VoteGrant = false
@@ -168,31 +171,31 @@ func (rf *Raft) RequestVote(args requestVoteArgs, reply requestVoteReply) error 
 	return nil
 }
 
-type heartbeatArgs struct {
+type HeartbeatArgs struct {
 	Term   int
 	Leader int
 }
 
-type heartbeatReply struct {
+type HeartbeatReply struct {
 	Term int
 }
 
 func (rf *Raft) broadcastHeartBeat() {
-	args := heartbeatArgs{
+	args := HeartbeatArgs{
 		Term:   rf.currentTerm,
 		Leader: rf.me,
 	}
 
 	for i := range rf.nodes {
 		go func(i int) {
-			var reply heartbeatReply
+			var reply HeartbeatReply
 			rf.sendHeartBeat(i, args, &reply)
 		}(i)
 	}
 }
 
-func (rf *Raft) sendHeartBeat(nodeId int, args heartbeatArgs, reply *heartbeatReply) {
-	client, err := rpc.Dial("tcp", rf.nodes[nodeId].address)
+func (rf *Raft) sendHeartBeat(nodeId int, args HeartbeatArgs, reply *HeartbeatReply) {
+	client, err := rpc.DialHTTP("tcp", rf.nodes[nodeId].address)
 	if err != nil {
 		log.Fatalf("rpc err: %v \n", err)
 	}
@@ -207,7 +210,7 @@ func (rf *Raft) sendHeartBeat(nodeId int, args heartbeatArgs, reply *heartbeatRe
 	}
 }
 
-func (rf *Raft) HeartBeat(args heartbeatArgs, reply heartbeatReply) error {
+func (rf *Raft) HeartBeat(args HeartbeatArgs, reply *HeartbeatReply) error {
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
 		return nil
