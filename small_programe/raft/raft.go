@@ -190,12 +190,14 @@ func (rf *Raft) sendRequestVote(nodeId int, args RequestVoteArgs, reply *Request
 
 func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) error {
 	// 作为其他节点，收到一个投票请求，确认是否要投票
+	// Candidate节点过时，拒绝投票
 	if args.Term < rf.currentTerm {
 		reply.Term = rf.currentTerm
 		reply.VoteGrant = false
 		return nil
 	}
 
+	// 说明还没有投票给其他人，投票成功
 	if rf.voteFor == -1 {
 		rf.voteFor = args.Candidate
 		rf.currentTerm = args.Term
@@ -204,14 +206,16 @@ func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) error
 		return nil
 	}
 
+	// 可能已投票给其他人，投票失败
 	reply.Term = rf.currentTerm
 	reply.VoteGrant = false
 	return nil
 }
 
 type HeartbeatArgs struct {
-	Term         int
-	Leader       int
+	Term   int
+	Leader int
+	// follower依据PrevLogIndex和PrevLogTerm和自己的本地日志对比，决定是否要同步Entries
 	PrevLogIndex int        //新日志之前的索引
 	PrevLogTerm  int        //PrevLogIndex对应的term
 	Entries      []LogEntry // 准备存储的日志条目，心跳时为空
@@ -256,13 +260,27 @@ func (rf *Raft) sendHeartBeat(nodeId int, args HeartbeatArgs, reply *HeartbeatRe
 
 	_ = client.Call("Raft.HeartBeat", args, reply)
 
-	// 收到心跳回复后，发现自己的term小于其他节点，说明已经过期，自己变为Follower，重新选举
-	if reply.Term > rf.currentTerm {
-		rf.currentTerm = reply.Term
-		rf.voteFor = -1
-		rf.voteCount = 0
-		rf.role = Follower
+	if reply.Success {
+		if reply.NextIndex > 0 {
+			rf.nextIndex[nodeId] = reply.NextIndex
+			rf.matchIndex[nodeId] = rf.nextIndex[nodeId] - 1
+			// TODO
+			// 如果大于半数节点同步成功
+			// 1. 更新 leader 节点的 commitIndex
+			// 2. 返回给客户端
+			// 3. 应用状态就机
+			// 4. 通知 Followers Entry 已提交
+		}
+	} else {
+		// 收到心跳回复后，发现自己的term小于其他节点，说明已经过期，自己变为Follower，重新选举
+		if reply.Term > rf.currentTerm {
+			rf.currentTerm = reply.Term
+			rf.voteFor = -1
+			rf.voteCount = 0
+			rf.role = Follower
+		}
 	}
+
 }
 
 func (rf *Raft) HeartBeat(args HeartbeatArgs, reply *HeartbeatReply) error {
@@ -277,11 +295,35 @@ func (rf *Raft) HeartBeat(args HeartbeatArgs, reply *HeartbeatReply) error {
 		rf.role = Follower
 	}
 
-	reply.Term = rf.currentTerm
+	// 没有entries，仅heartbeat的情况
 	rf.heartbeatCh <- true
+	if len(args.Entries) == 0 {
+		reply.Success = true
+		reply.Term = rf.currentTerm
+		return nil
+	}
+
+	// 有entries
+	// 但leader维护的logindex大于follower的，follower之前失联过，follower告知当前自己的最大索引，下次心跳leader返回相应的
+	if args.PrevLogIndex > rf.getLastIndex() {
+		reply.Success = false
+		reply.Term = rf.currentTerm
+		reply.NextIndex = rf.getLastIndex() + 1
+		return nil
+	}
+
+	// 添加leader发送的log并更新commitIndex
+	rf.logs = append(rf.logs, args.Entries...)
+	rf.commitIndex = rf.getLastIndex()
+	reply.Success = true
+	reply.Term = rf.currentTerm
+	reply.NextIndex = rf.getLastIndex() + 1
 	return nil
 }
 
 func (rf *Raft) getLastIndex() int {
-	return 0
+	if len(rf.logs) == 0 {
+		return 0
+	}
+	return rf.logs[len(rf.logs)-1].LogIndex
 }
