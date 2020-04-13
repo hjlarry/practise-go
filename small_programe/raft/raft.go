@@ -34,10 +34,10 @@ type Raft struct {
 	heartbeatCh chan bool // 其中取出true，说明收到leader发出的心跳
 
 	logs        []LogEntry
-	commitIndex int
-	lastApplied int
-	nextIndex   []int
-	matchIndex  []int
+	commitIndex int   // 被提交的最大索引
+	lastApplied int   // 被应用到状态机的最大索引
+	nextIndex   []int // 保存需要发送给每个节点的下一个条目索引
+	matchIndex  []int // 保存已经复制给每个节点日志的最高索引
 }
 
 type LogEntry struct {
@@ -107,6 +107,28 @@ func (rf *Raft) start() {
 				case <-rf.toLeaderCh:
 					fmt.Printf("candiate %d become leader", rf.me)
 					rf.role = Leader
+					rf.nextIndex = make([]int, len(rf.nodes))
+					rf.matchIndex = make([]int, len(rf.nodes))
+					// 为每个节点初始化nextIndex和matchIndex，这里不考虑leader重新选举的情况
+					for i := range rf.nodes {
+						rf.nextIndex[i] = 1
+						rf.matchIndex[i] = 0
+					}
+
+					// 模拟客户端每3秒发送一条command
+					go func() {
+						i := 0
+						for {
+							i++
+							newEntry := LogEntry{
+								LogTerm:    rf.currentTerm,
+								LogIndex:   i,
+								LogCommand: fmt.Sprintf("user send: %d", i),
+							}
+							rf.logs = append(rf.logs, newEntry)
+							time.Sleep(time.Second * 3)
+						}
+					}()
 				}
 			case Leader:
 				rf.broadcastHeartBeat()
@@ -188,25 +210,40 @@ func (rf *Raft) RequestVote(args RequestVoteArgs, reply *RequestVoteReply) error
 }
 
 type HeartbeatArgs struct {
-	Term   int
-	Leader int
+	Term         int
+	Leader       int
+	PrevLogIndex int        //新日志之前的索引
+	PrevLogTerm  int        //PrevLogIndex对应的term
+	Entries      []LogEntry // 准备存储的日志条目，心跳时为空
+	LeaderCommit int        //Leader已经commit的索引值
 }
 
 type HeartbeatReply struct {
-	Term int
+	Term      int
+	Success   bool
+	NextIndex int //如果Follower index小于leader，会告诉leader下次开始发送的索引位置
 }
 
 func (rf *Raft) broadcastHeartBeat() {
-	args := HeartbeatArgs{
-		Term:   rf.currentTerm,
-		Leader: rf.me,
-	}
-
 	for i := range rf.nodes {
-		go func(i int) {
+		args := HeartbeatArgs{
+			Term:         rf.currentTerm,
+			Leader:       rf.me,
+			LeaderCommit: rf.commitIndex,
+		}
+		prevLogIndex := rf.nextIndex[i] - 1
+		// 如果没有可以发送的LogEntry
+		if rf.getLastIndex() > prevLogIndex {
+			args.PrevLogIndex = prevLogIndex
+			args.PrevLogTerm = rf.logs[prevLogIndex].LogTerm
+			args.Entries = rf.logs[prevLogIndex:]
+			log.Printf("send entries: %v \n", args.Entries)
+		}
+
+		go func(i int, args HeartbeatArgs) {
 			var reply HeartbeatReply
 			rf.sendHeartBeat(i, args, &reply)
-		}(i)
+		}(i, args)
 	}
 }
 
@@ -243,4 +280,8 @@ func (rf *Raft) HeartBeat(args HeartbeatArgs, reply *HeartbeatReply) error {
 	reply.Term = rf.currentTerm
 	rf.heartbeatCh <- true
 	return nil
+}
+
+func (rf *Raft) getLastIndex() int {
+	return 0
 }
