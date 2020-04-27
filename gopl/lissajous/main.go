@@ -1,5 +1,6 @@
 package main
 
+// 利用颜色编码生成一个gif动画
 // ./main > out.gif
 import (
 	"image"

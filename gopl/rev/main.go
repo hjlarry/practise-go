@@ -2,6 +2,7 @@ package main
 
 import "fmt"
 
+//在原内存空间将[]int类型的slice反转，而且它可以用于任意长度的slice
 func reverse(s []int) {
 	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
 		s[i], s[j] = s[j], s[i]

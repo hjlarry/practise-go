@@ -7,7 +7,7 @@ type tree struct {
 	left, right *tree
 }
 
-// Sort sorts values in place.
+// 使用二叉查找树来实现一个插入排序
 func Sort(values []int) {
 	var root *tree
 	for _, v := range values {

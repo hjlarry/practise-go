@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-// Flags ...
+// 来自net包的例子，用于给一个无符号整数的最低5bit的每个bit指定一个名字
 type Flags uint
 
 const (

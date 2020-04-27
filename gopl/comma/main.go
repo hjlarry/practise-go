@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 )
-
+// 递归的将每三位数字之间加入一个逗号
 func main() {
 	fmt.Println(comma("1234567892"))
 	fmt.Println(comma2("1234567892"))
